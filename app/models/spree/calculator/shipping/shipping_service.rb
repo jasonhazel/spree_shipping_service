@@ -8,7 +8,7 @@ module Spree
 
     def compute_package(package)
       rate = package.shipping_rates.select do |rate|
-        rate.name == shipping_method.name
+        rate.service_code == shipping_method.admin_name
       end.first
 
       new_rate = rate.cost + preferred_handling_fee
