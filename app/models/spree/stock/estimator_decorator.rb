@@ -12,7 +12,6 @@ Spree::Stock::Estimator.class_eval do
       end
     end
 
-
     package.shipping_rates
   end
 
@@ -34,7 +33,7 @@ Spree::Stock::Estimator.class_eval do
     end
 
     def api_path(params)
-      "http://www.switchboxinc.com.php53-2.dfw1-2.websitetestlink.com/php_shipper//index.php?#{params.to_query}"
+      "http://www.switchboxinc.com.php53-2.dfw1-2.websitetestlink.com/php_shipper/index.php?#{params.to_query}"
     end
 
 

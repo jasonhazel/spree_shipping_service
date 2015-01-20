@@ -39,8 +39,6 @@ Spree::Stock::Coordinator.class_eval do
       end
     end
 
-
-
     combined.compact.sort_by(&:cost)
   end
 
