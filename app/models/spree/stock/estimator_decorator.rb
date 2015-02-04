@@ -1,8 +1,17 @@
 Spree::Stock::Estimator.class_eval do
   def shipping_rates(package)
-    rates(package).each do |rate|
-      ship_method = shipping_method(rate)
-      unless ship_method.nil?
+    shipping_rates = rates(package)
+    shipping_methods.each do |ship_method|
+      rate = rate_by_shipping_method(shipping_rates, ship_method)
+      if rate.nil?
+        if ship_method.calculator.type == 'Spree::Calculator::Shipping::PickUp'
+          package.shipping_rates << Spree::ShippingRate.new({
+            name: ship_method.name,
+            cost: 0,
+            shipping_method_id: ship_method.id
+          })
+        end
+      else
         package.shipping_rates << Spree::ShippingRate.new({
           name: rate.desc,
           service_code: rate.service_code,
@@ -11,9 +20,9 @@ Spree::Stock::Estimator.class_eval do
         })
       end
     end
-
     package.shipping_rates
   end
+
 
   private
 
@@ -22,11 +31,12 @@ Spree::Stock::Estimator.class_eval do
     end
 
     def shipping_method(rate)
-      shipping_methods.select do |sm| 
-        sm.admin_name == rate.service_code
-      end.first
+      shipping_methods.find_by(admin_name: rate.service_code)
     end
 
+    def rate_by_shipping_method(rates, shipping_method)
+      rates.select { |r| r.service_code == shipping_method.admin_name }.first
+    end
 
     def prepare_package(package)
       package # until we determine what we actually need

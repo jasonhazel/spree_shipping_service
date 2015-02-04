@@ -11,6 +11,8 @@ module Spree
         rate.service_code == shipping_method.admin_name
       end.first
 
+      return 0 if rate.nil?
+
       new_rate = rate.cost + preferred_handling_fee
 
       # no negative shipping rates
