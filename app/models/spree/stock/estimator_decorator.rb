@@ -49,6 +49,11 @@ Spree::Stock::Estimator.class_eval do
 
 
     def rates(package)   
+      if package.box.nil?
+        boxes = Spree::BoxSize.package_fits(package)
+        package.box = boxes.first
+      end
+
       address = package.order.shipping_address
 
       details = {
