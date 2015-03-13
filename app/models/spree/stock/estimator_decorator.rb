@@ -67,7 +67,7 @@ Spree::Stock::Estimator.class_eval do
         length: package.box.length,
         height: package.box.height,
         width: package.box.width,
-        weight: package.weight
+        weight: package.weight + package.box.weight
       }
 
       response = open(api_path(details)).read
