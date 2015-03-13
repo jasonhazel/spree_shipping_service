@@ -5,11 +5,13 @@ Spree::Stock::Estimator.class_eval do
       rate = rate_by_shipping_method(shipping_rates, ship_method)
       if rate.nil?
         if ship_method.calculator.type == 'Spree::Calculator::Shipping::PickUp'
-          package.shipping_rates << Spree::ShippingRate.new({
-            name: ship_method.name,
-            cost: 0,
-            shipping_method_id: ship_method.id
-          })
+          if package.order.ship_address.state.abbr.upcase == ship_method.calculator.preferred_state_code.upcase
+            package.shipping_rates << Spree::ShippingRate.new({
+              name: ship_method.name,
+              cost: 0,
+              shipping_method_id: ship_method.id
+            })
+          end
         end
       else
         package.shipping_rates << Spree::ShippingRate.new({
@@ -25,7 +27,6 @@ Spree::Stock::Estimator.class_eval do
 
 
   private
-
     def shipping_methods
       @shipping_methods ||= Spree::ShippingMethod.all
     end
@@ -66,7 +67,7 @@ Spree::Stock::Estimator.class_eval do
         length: package.box.length,
         height: package.box.height,
         width: package.box.width,
-        weight: package.weight
+        weight: package.weight + package.box.weight
       }
 
       response = open(api_path(details)).read
