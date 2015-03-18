@@ -4,3 +4,6 @@
 en:
   hello: "Hello world"
   shipping_service: 'Shipping Service API'
+  spree:
+    order_state:
+      insurance: 'Insurance'

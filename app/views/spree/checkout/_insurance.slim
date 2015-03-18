@@ -1,0 +1,9 @@
+.row
+  .col-sm-6
+    = label_tag :shipping_insurance do
+      = check_box_tag 'order[insurance]', '1'
+      = ' Add Shipping Insurance?'
+
+.row
+  .well.text-right.form-buttons{ data = { hook: 'buttons' }}
+    = submit_tag Spree.t(:save_and_continue), :class => 'btn btn-lg btn-success'
