@@ -1,7 +1,7 @@
 .row
   .col-sm-6
     = label_tag :shipping_insurance do
-      = check_box_tag 'order[insurance]', '1'
+      = check_box_tag "order[shipping_insurance]", "1", @order.shipping_insurance
       = ' Add Shipping Insurance?'
 
 .row

@@ -1,0 +1,1 @@
+Spree::PermittedAttributes.checkout_attributes << :shipping_insurance
