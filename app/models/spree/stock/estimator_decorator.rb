@@ -14,12 +14,14 @@ Spree::Stock::Estimator.class_eval do
           end
         end
       else
-        package.shipping_rates << Spree::ShippingRate.new({
-          name: rate.desc,
-          service_code: rate.service_code,
-          cost: rate.negotiated_rate || rate.rate,
-          shipping_method_id: ship_method.id
-        })
+        unless skip_usps?(package, rate)
+          package.shipping_rates << Spree::ShippingRate.new({
+            name: rate.desc,
+            service_code: rate.service_code,
+            cost: rate.negotiated_rate || rate.rate,
+            shipping_method_id: ship_method.id
+          })
+        end
       end
     end
     package.shipping_rates
@@ -27,6 +29,11 @@ Spree::Stock::Estimator.class_eval do
 
 
   private
+    def skip_usps?(package, rate)
+      package.has_batteries? && rate.service_code =~ /USPS/i
+    end
+
+
     def shipping_methods
       @shipping_methods ||= Spree::ShippingMethod.all
     end
@@ -67,16 +74,18 @@ Spree::Stock::Estimator.class_eval do
         length: package.box.length,
         height: package.box.height,
         width: package.box.width,
-        weight: package.weight + package.box.weight
+        weight: package.weight + package.box.weight,
+        insurance: package.order.shipping_insurance
       }
 
       response = open(api_path(details)).read
-      process_response(response)
+      process_response(response, package)
     end 
 
-    def process_response(json)
+    def process_response(json, package)
       JSON.parse(json)['rates'].map do |c, rates|
         rates.map do |rate|
+
           rate_as_object = OpenStruct.new(rate)
           rate_as_object.service_code = "#{c.upcase}-#{rate_as_object.service_code}"
           rate_as_object
