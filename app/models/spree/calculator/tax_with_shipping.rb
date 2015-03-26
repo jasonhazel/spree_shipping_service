@@ -51,7 +51,7 @@ module Spree
 
     private
     def shipping_rate(order)
-      rates = order.shipments.map(&:selected_shipping_rate)
+      rates = order.shipments.map(&:selected_shipping_rate).compact
       rates.count < 1 ? 0.0 : rates.first.cost
     end
 
