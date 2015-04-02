@@ -74,9 +74,9 @@ Spree::Stock::Estimator.class_eval do
         length: package.box.length,
         height: package.box.height,
         width: package.box.width,
-        weight: package.weight + package.box.weight,
-        insurance: package.order.shipping_insurance
+        weight: package.weight + package.box.weight
       }
+      details[:insurance] = package.price if package.order.shipping_insurance
 
       response = open(api_path(details)).read
       process_response(response, package)
