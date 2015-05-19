@@ -1,26 +1,35 @@
 Spree::Stock::Estimator.class_eval do
   def shipping_rates(package)
-    shipping_rates = rates(package)
-    shipping_methods.each do |ship_method|
-      rate = rate_by_shipping_method(shipping_rates, ship_method)
-      if rate.nil?
-        if ship_method.calculator.type == 'Spree::Calculator::Shipping::PickUp'
-          if package.order.ship_address.state.abbr.upcase == ship_method.calculator.preferred_state_code.upcase
+    if package.only_giftcard?
+      ship_method = shipping_methods.find_by(admin_name: 'Digital')
+      package.shipping_rates << Spree::ShippingRate.new({
+        name: 'Digital',
+        cost: 0,
+        shipping_method_id: ship_method.id
+      })
+    else
+      shipping_rates = rates(package)
+      shipping_methods.each do |ship_method|
+        rate = rate_by_shipping_method(shipping_rates, ship_method)
+        if rate.nil?
+          if ship_method.calculator.type == 'Spree::Calculator::Shipping::PickUp'
+            if package.order.ship_address.state.abbr.upcase == ship_method.calculator.preferred_state_code.upcase
+              package.shipping_rates << Spree::ShippingRate.new({
+                name: ship_method.name,
+                cost: 0,
+                shipping_method_id: ship_method.id
+              })
+            end
+          end
+        else
+          unless skip_usps?(package, rate)
             package.shipping_rates << Spree::ShippingRate.new({
-              name: ship_method.name,
-              cost: 0,
+              name: rate.desc,
+              service_code: rate.service_code,
+              cost: rate.negotiated_rate || rate.rate,
               shipping_method_id: ship_method.id
             })
           end
-        end
-      else
-        unless skip_usps?(package, rate)
-          package.shipping_rates << Spree::ShippingRate.new({
-            name: rate.desc,
-            service_code: rate.service_code,
-            cost: rate.negotiated_rate || rate.rate,
-            shipping_method_id: ship_method.id
-          })
         end
       end
     end
@@ -31,6 +40,10 @@ Spree::Stock::Estimator.class_eval do
   private
     def skip_usps?(package, rate)
       package.has_batteries? && rate.service_code =~ /USPS/i
+    end
+
+    def digital?(package)
+
     end
 
 
